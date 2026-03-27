@@ -1,54 +1,45 @@
-<<<<<<< HEAD
-# Welcome to your Expo app 👋
+# 🚗 ParkSmart-App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil desarrollada con Expo y Firebase para la gestión inteligente de estacionamientos.
 
-## Get started
+## 📱 Descripción
 
-1. Install dependencies
+ParkSmart es una aplicación que permite administrar un estacionamiento de manera eficiente, diferenciando entre dos tipos de usuarios:
 
-   ```bash
-   npm install
-   ```
+- 👤 Administrador: Control total del sistema
+- 🔧 Operador: Registro de entradas y salidas
 
-2. Start the app
+La aplicación permite llevar un control en tiempo real de los vehículos, espacios disponibles e ingresos generados.
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠️ Tecnologías utilizadas
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- React Native (Expo)
+- TypeScript
+- Firebase Authentication
+- Firebase Firestore
+- AsyncStorage
+- Expo Router
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## ⚙️ Funcionalidades principales
 
-When you're ready, run:
+- Registro de usuarios (Administrador / Operador)
+- Inicio de sesión con autenticación
+- Detección automática de rol
+- Registro de entrada de vehículos
+- Registro de salida con cálculo de costo
+- Historial de movimientos
+- Panel administrativo (configuración y reportes)
+- Autenticación biométrica (huella)
+
+---
+
+## ▶️ Cómo ejecutar el proyecto
+
+1. Clonar el repositorio:
 
 ```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-=======
-# ParkSmart-App
->>>>>>> 7a25b983d8d93d532683ce38849a772b63c0e04f
+git clone https://github.com/orlando4-art/ParkSmart-App.git
