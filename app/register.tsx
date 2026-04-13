@@ -3,15 +3,10 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator, Alert, ScrollView, StyleSheet,
+  Text, TextInput, TouchableOpacity, View
 } from "react-native";
+import { guardarUsuarioLocal } from "../services/database";
 import { auth, db } from "../services/firebase";
 
 export default function Register() {
@@ -24,8 +19,8 @@ export default function Register() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!nombre.trim() || !email.trim() || !password.trim() || !confirmar.trim()) {
-      Alert.alert("Error", "Todos los campos son obligatorios");
+    if (!nombre || !email || !password || !confirmar) {
+      Alert.alert("Error", "Completa todos los campos");
       return;
     }
     if (password !== confirmar) {
@@ -33,207 +28,119 @@ export default function Register() {
       return;
     }
     if (password.length < 6) {
-      Alert.alert("Error", "La contraseña debe tener al menos 6 caracteres");
+      Alert.alert("Error", "Mínimo 6 caracteres");
       return;
     }
 
     setLoading(true);
-    try {
-      // Crear usuario en Firebase Auth
-      const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
 
-      // Guardar datos del usuario en Firestore con su rol
-      await setDoc(doc(db, "usuarios", cred.user.uid), {
-        nombre: nombre.trim(),
-        email: email.trim(),
-        rol,
-        creadoEn: new Date(),
-      });
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      Alert.alert("Tiempo agotado", "Verifica tu internet e intenta de nuevo.");
+    }, 15000);
+
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Guardar en Firestore (puede fallar sin internet)
+      try {
+        await Promise.race([
+          setDoc(doc(db, "usuarios", cred.user.uid), {
+            nombre, email, rol, creadoEn: new Date(),
+          }),
+          new Promise<never>((_, r) => setTimeout(() => r(new Error("timeout")), 8000)),
+        ]);
+      } catch (e) {
+        console.log("Firestore no disponible, guardando local");
+      }
+
+      // Siempre guardar en SQLite con el rol seleccionado
+      guardarUsuarioLocal(cred.user.uid, nombre, email, rol);
+
+      clearTimeout(timeoutId);
+      setLoading(false);
 
       Alert.alert(
         "✅ Cuenta creada",
-        `Bienvenido ${nombre}. Tu cuenta de ${rol} fue creada exitosamente.`,
-        [{ text: "Iniciar sesión", onPress: () => router.replace("/login") }]
+        `Nombre: ${nombre}\nRol: ${rol === "admin" ? "👑 Administrador" : "👷 Operador"}`,
+        [{ text: "Ir al login", onPress: () => router.replace("/login") }]
       );
     } catch (error: any) {
-      if (error.code === "auth/email-already-in-use") {
-        Alert.alert("Error", "Este correo ya está registrado");
-      } else if (error.code === "auth/invalid-email") {
-        Alert.alert("Error", "El correo no es válido");
-      } else {
-        Alert.alert("Error", "No se pudo crear la cuenta. Intenta de nuevo.");
-      }
-    } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
+      if (error.code === "auth/email-already-in-use") {
+        Alert.alert("Error", "Correo ya registrado");
+      } else if (error.code === "auth/network-request-failed") {
+        Alert.alert("Sin conexión", "Necesitas internet para crear una cuenta.");
+      } else {
+        Alert.alert("Error", error.message || "No se pudo registrar");
+      }
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Text style={styles.backText}>← Volver</Text>
+      <Text style={styles.title}>Registro</Text>
+
+      <TextInput placeholder="Nombre" style={styles.input} onChangeText={setNombre} editable={!loading} />
+      <TextInput placeholder="Correo" style={styles.input} onChangeText={setEmail} autoCapitalize="none" editable={!loading} />
+      <TextInput placeholder="Contraseña" secureTextEntry style={styles.input} onChangeText={setPassword} editable={!loading} />
+      <TextInput placeholder="Confirmar contraseña" secureTextEntry style={styles.input} onChangeText={setConfirmar} editable={!loading} />
+
+      {/* ✅ Selector de rol visible */}
+      <Text style={styles.rolLabel}>Tipo de cuenta:</Text>
+      <View style={styles.rolRow}>
+        <TouchableOpacity
+          style={[styles.rolBtn, rol === "operador" && styles.rolBtnActive]}
+          onPress={() => setRol("operador")}
+        >
+          <Text style={styles.rolIcon}>👷</Text>
+          <Text style={[styles.rolText, rol === "operador" && styles.rolTextActive]}>Operador</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.rolBtn, rol === "admin" && styles.rolBtnActiveAdmin]}
+          onPress={() => setRol("admin")}
+        >
+          <Text style={styles.rolIcon}>👑</Text>
+          <Text style={[styles.rolText, rol === "admin" && styles.rolTextActiveAdmin]}>Administrador</Text>
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity
+        style={[styles.button, loading && { opacity: 0.7 }]}
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        {loading
+          ? <ActivityIndicator color="#fff" />
+          : <Text style={styles.buttonText}>Registrar</Text>
+        }
       </TouchableOpacity>
 
-      <View style={styles.logoCircle}>
-        <Text style={styles.logoIcon}>🚗</Text>
-      </View>
-      <Text style={styles.titulo}>Crear cuenta</Text>
-      <Text style={styles.subtitulo}>ParkSmart</Text>
-
-      <View style={styles.card}>
-        {/* Selector de rol */}
-        <Text style={styles.label}>Tipo de cuenta</Text>
-        <View style={styles.rolRow}>
-          <TouchableOpacity
-            style={[styles.rolBtn, rol === "operador" && styles.rolBtnActive]}
-            onPress={() => setRol("operador")}
-          >
-            <Text style={styles.rolIcon}>🔧</Text>
-            <Text style={[styles.rolText, rol === "operador" && styles.rolTextActive]}>
-              Operador
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.rolBtn, rol === "admin" && styles.rolBtnActiveAdmin]}
-            onPress={() => setRol("admin")}
-          >
-            <Text style={styles.rolIcon}>👤</Text>
-            <Text style={[styles.rolText, rol === "admin" && styles.rolTextActiveAdmin]}>
-              Administrador
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.label}>Nombre completo</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Tu nombre"
-          value={nombre}
-          onChangeText={setNombre}
-          autoCapitalize="words"
-        />
-
-        <Text style={styles.label}>Correo electrónico</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="correo@ejemplo.com"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <Text style={styles.label}>Contraseña</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Mínimo 6 caracteres"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        <Text style={styles.label}>Confirmar contraseña</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Repite tu contraseña"
-          secureTextEntry
-          value={confirmar}
-          onChangeText={setConfirmar}
-        />
-
-        <TouchableOpacity
-          style={[styles.button, loading && { opacity: 0.7 }]}
-          onPress={handleRegister}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Crear cuenta</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.replace("/login")}>
-          <Text style={styles.loginLink}>¿Ya tienes cuenta? Inicia sesión</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity onPress={() => router.replace("/login")} disabled={loading}>
+        <Text style={styles.link}>Ya tengo cuenta</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    alignItems: "center",
-    backgroundColor: "#2563EB",
-    padding: 24,
-    paddingTop: 60,
-  },
-  backBtn: { alignSelf: "flex-start", marginBottom: 20 },
-  backText: { color: "#bfdbfe", fontSize: 16 },
-  logoCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  logoIcon: { fontSize: 30 },
-  titulo: { fontSize: 28, fontWeight: "bold", color: "#fff", marginBottom: 4 },
-  subtitulo: { fontSize: 14, color: "#bfdbfe", marginBottom: 24 },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 24,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  label: { fontSize: 14, color: "#374151", marginBottom: 6, fontWeight: "600" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 10,
-    padding: 13,
-    fontSize: 15,
-    marginBottom: 16,
-    backgroundColor: "#f9fafb",
-  },
-  rolRow: { flexDirection: "row", gap: 12, marginBottom: 20 },
+  container: { flexGrow: 1, justifyContent: "center", padding: 20 },
+  title: { fontSize: 24, textAlign: "center", marginBottom: 20 },
+  input: { borderWidth: 1, padding: 12, marginBottom: 10, borderRadius: 8 },
+  rolLabel: { fontSize: 14, fontWeight: "600", marginBottom: 8, color: "#374151" },
+  rolRow: { flexDirection: "row", gap: 10, marginBottom: 16 },
   rolBtn: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    backgroundColor: "#f3f4f6",
-    borderWidth: 2,
-    borderColor: "#e5e7eb",
-    gap: 6,
+    flex: 1, padding: 14, borderRadius: 10, alignItems: "center",
+    borderWidth: 2, borderColor: "#e5e7eb", backgroundColor: "#f9fafb",
   },
-  rolBtnActive: { borderColor: "#2563EB", backgroundColor: "#eff6ff" },
+  rolBtnActive: { borderColor: "#22C55E", backgroundColor: "#f0fdf4" },
   rolBtnActiveAdmin: { borderColor: "#7C3AED", backgroundColor: "#f5f3ff" },
-  rolIcon: { fontSize: 24 },
+  rolIcon: { fontSize: 24, marginBottom: 4 },
   rolText: { fontSize: 13, fontWeight: "600", color: "#6b7280" },
-  rolTextActive: { color: "#2563EB" },
+  rolTextActive: { color: "#22C55E" },
   rolTextActiveAdmin: { color: "#7C3AED" },
-  button: {
-    backgroundColor: "#2563EB",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    marginBottom: 16,
-    marginTop: 4,
-  },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  loginLink: {
-    textAlign: "center",
-    color: "#6b7280",
-    fontSize: 13,
-    textDecorationLine: "underline",
-  },
+  button: { backgroundColor: "#22C55E", padding: 15, borderRadius: 8 },
+  buttonText: { color: "#fff", textAlign: "center" },
+  link: { marginTop: 15, textAlign: "center", color: "#2563EB" },
 });

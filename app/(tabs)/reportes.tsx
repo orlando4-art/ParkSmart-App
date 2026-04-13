@@ -23,8 +23,8 @@ export default function Reportes() {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>📊 Reportes</Text>
-      <Text style={styles.subtitle}>Solo visible para administradores</Text>
-
+      <Text style={styles.subtitle}>Consulta de movimientos</Text>
+      
       <View style={styles.grid}>
         <View style={[styles.statCard, { backgroundColor: "#2563EB" }]}>
           <Text style={styles.statNum}>{registros.length}</Text>

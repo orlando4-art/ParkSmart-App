@@ -1,93 +1,82 @@
-# 🚗 ParkSmart-App
+# 🅿️ ParkSmart — Sistema de Gestión de Estacionamiento
 
-Aplicación móvil desarrollada con Expo y Firebase para la gestión inteligente de estacionamientos.
+Aplicación móvil desarrollada con React Native y Expo para la gestión 
+automatizada de estacionamientos vehiculares.
 
 ## 📱 Descripción
 
-ParkSmart es una aplicación móvil diseñada para optimizar la administración de estacionamientos mediante el uso de tecnologías modernas como React Native y Firebase. El sistema permite gestionar de manera eficiente el flujo de vehículos, así como el control de espacios disponibles e ingresos generados.
+ParkSmart permite registrar entradas y salidas de vehículos en tiempo real,
+calcular tarifas automáticamente, gestionar múltiples estacionamientos y 
+administrar operadores desde un panel de control móvil.
 
-La aplicación distingue entre dos tipos de usuarios:
+## ✨ Funcionalidades principales
 
-* 👤 **Administrador**: Cuenta con acceso completo al sistema, incluyendo configuración, reportes y control general.
-* 🔧 **Operador**: Encargado del registro de entradas y salidas de vehículos.
-
-Gracias a esta diferenciación de roles, se garantiza una correcta organización y control del sistema.
-
----
+- Registro de entrada por voz o teclado personalizado
+- Detección automática de tipo de vehículo (auto/moto)
+- Cálculo proporcional de tarifas por minuto
+- Generación de tickets en PDF
+- Exportación de historial en CSV
+- Autenticación biométrica (huella / Face ID)
+- Sincronización en tiempo real con Firebase
+- Funcionamiento offline con SQLite
+- Geolocalización de estacionamientos cercanos
+- Panel de reportes e ingresos
 
 ## 🛠️ Tecnologías utilizadas
 
-* React Native (Expo)
-* TypeScript
-* Firebase Authentication
-* Firebase Firestore
-* AsyncStorage
-* Expo Router
-* Expo Local Authentication
+| Tecnología | Versión | Uso |
+|---|---|---|
+| React Native | 0.81.5 | Framework móvil |
+| Expo SDK | 54 | APIs nativas |
+| Expo Router | 6 | Navegación |
+| Firebase Auth | 12 | Autenticación |
+| Firebase Firestore | 11 | Base de datos en la nube |
+| expo-sqlite | 16 | Base de datos local |
+| expo-speech-recognition | 0.1 | Reconocimiento de voz |
+| expo-camera | 17 | Captura de placas |
+| expo-local-authentication | 17 | Biometría |
+| EAS Build | 12 | Compilación APK |
 
----
+## 🚀 Instrucciones de instalación y ejecución
 
-## ⚙️ Funcionalidades principales
+### Requisitos previos
+- Node.js 18 o superior
+- npm o yarn
+- Expo CLI instalado globalmente
+- Cuenta en Firebase (gratuita)
 
-* Registro de usuarios con roles (Administrador / Operador)
-* Inicio de sesión con autenticación segura
-* Detección automática de rol del usuario
-* Registro de entrada de vehículos
-* Registro de salida con cálculo automático de costo
-* Visualización de historial de movimientos
-* Panel administrativo con configuración del sistema
-* Generación de reportes e ingresos
-* Autenticación biométrica mediante huella dactilar
-
----
-
-## ▶️ Cómo ejecutar el proyecto
-
-1. Clonar el repositorio:
+### Instalación
 
 ```bash
+# Clonar el repositorio
 git clone https://github.com/orlando4-art/ParkSmart-App.git
-```
 
-2. Entrar al proyecto:
+# Entrar al directorio
+cd ParkSmart
 
-```bash
-cd ParkSmart-App
-```
-
-3. Instalar dependencias:
-
-```bash
+# Instalar dependencias
 npm install
+
+# Iniciar en modo desarrollo
+npx expo start --go
 ```
 
-4. Ejecutar la aplicación:
+### Generar APK
 
 ```bash
-npx expo start
+# Instalar EAS CLI
+npm install -g eas-cli
+
+# Login en Expo
+eas login
+
+# Generar APK
+eas build -p android --profile preview
 ```
 
-5. Escanear el código QR con Expo Go o usar un emulador.
+## 📦 Archivo de distribución
 
----
+El APK de distribución interna está disponible en:
+[Descargar APK - ParkSmart v1.0.0](https://expo.dev/accounts/orlando10/projects/estacionamiento/builds/48ab23ea-5e12-4f21-921a-bf29a5c20314)
 
-## 🔐 Control de versiones
-
-El desarrollo del proyecto se realizó utilizando Git y GitHub como sistema de control de versiones. Se realizaron múltiples commits que reflejan el progreso del desarrollo, desde la creación de la estructura base hasta la implementación de funcionalidades como autenticación, roles de usuario, reportes y configuración.
-
-Esto permite llevar un historial de cambios organizado, facilitando el mantenimiento y evolución del sistema.
-
----
-
-## 👨‍💻 Autor
-
-* Orlando Alvarez González
-* GitHub: https://github.com/orlando4-art
-
----
-
-## 📌 Repositorio
-
-Puedes acceder al repositorio del proyecto en el siguiente enlace:
-
-👉 https://github.com/orlando4-art/ParkSmart-App
+## 📁 Estructura del proyecto
